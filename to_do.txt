@@ -1,0 +1,4 @@
+TASKS
+
+001: Create boilerplate fast-api code. It should include a requirements.file, an sqlite db, db conn, health check endpoint.
+002: User Account Section
