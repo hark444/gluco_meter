@@ -1,3 +1,4 @@
+from datetime import timedelta
 from app.core import security
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.db.models.user import User
 from app.schemas.user import UserCreate
 from app.db.session import SessionLocal
-from app.core.security import SECRET_KEY, ALGORITHM
+from app.core.security import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -46,8 +47,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    access_token = security.create_access_token(data={"sub": user.email})
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security.create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
