@@ -17,6 +17,7 @@ from app.core.security import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.db.base import Base
 # Import models so that SQLAlchemy registers the tables
 from app.db.models import user as user_model  # noqa: F401
+from app.schemas.user import UserRole
 
 
 # Use an in-memory SQLite database for tests
@@ -70,4 +71,23 @@ def test_login_token_expiration():
 
     # Allow a small delta for processing time
     assert expected - timedelta(seconds=60) <= remaining <= expected + timedelta(seconds=60)
+
+
+def test_register_default_role_regular():
+    user_payload = {
+        "email": "roleuser@example.com",
+        "full_name": "Role User",
+        "password": "secret",
+    }
+
+    response = client.post("/api/register", json=user_payload)
+    assert response.status_code == 200
+
+    db = TestingSessionLocal()
+    try:
+        user = db.query(user_model.User).filter_by(email=user_payload["email"]).first()
+        assert user is not None
+        assert user.role == UserRole.regular
+    finally:
+        db.close()
 

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserRole
 from app.db.session import SessionLocal
 from app.core.security import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -34,7 +34,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         email=user_data.email,
         full_name=user_data.full_name,
         hashed_password=hashed_pw,
-        role=user_data.role or "user"
+        role=user_data.role or UserRole.regular
     )
     db.add(user)
     db.commit()
