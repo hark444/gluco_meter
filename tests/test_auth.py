@@ -73,6 +73,7 @@ def test_login_token_expiration():
     assert expected - timedelta(seconds=60) <= remaining <= expected + timedelta(seconds=60)
 
 
+
 def test_register_default_role_regular():
     user_payload = {
         "email": "roleuser@example.com",
@@ -90,4 +91,31 @@ def test_register_default_role_regular():
         assert user.role == UserRole.regular
     finally:
         db.close()
+
+def test_register_defaults_to_regular_role_and_login_issues_token():
+    """Registering without a role should store the user as 'regular' and allow login."""
+
+    payload = {
+        "email": "new_user@example.com",
+        "password": "supersecret",
+    }
+
+    # Register the user without specifying a role
+    response = client.post("/api/register", json=payload)
+    assert response.status_code == 200
+
+    # Verify the role stored in the database defaults to 'regular'
+    db = TestingSessionLocal()
+    user = db.query(user_model.User).filter_by(email=payload["email"]).first()
+    db.close()
+    assert user is not None
+    assert user.role == "regular"
+
+    # Login should return an access token
+    login_response = client.post(
+        "/api/login", data={"username": payload["email"], "password": payload["password"]}
+    )
+    assert login_response.status_code == 200
+    assert "access_token" in login_response.json()
+
 
