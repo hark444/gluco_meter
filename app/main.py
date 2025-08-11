@@ -1,6 +1,7 @@
 import logging
 from fastapi import FastAPI, Response
 from app.api import auth, users
+from app.api import readings
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -16,6 +17,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(readings.router, prefix="/api")
 
 logging.basicConfig(
     level=logging.INFO
