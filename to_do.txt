@@ -1,4 +1,14 @@
 TASKS
 
-001: Create initial FastAPI application with a requirements file, SQLite database connection, and a health check endpoint.
-002: User Account Section - completed
+001: Create initial FastAPI application with a requirements file, SQLite database connection, and a health check endpoint. - completed
+002: User Account Section (models, schemas) - completed
+003: Authentication endpoints (register, login) with JWT - completed
+004: Current user profile endpoint (/api/me) - completed
+005: Glucose readings APIs: create, list (date range + type filters), get-by-id, patch, delete - completed
+006: Reading schemas (ReadingType enum, create/update/out) - completed
+007: Update SQLAlchemy Reading model (value_ng_ml, reading_type, notes, created_at UTC) - completed
+008: Alembic migration to update readings columns and timezone-aware created_at - completed
+009: Wire readings router into app/main.py - completed
+010: Virtual environment setup and requirements installed - completed
+011: Auth tests: token expiration and default role - completed
+012: CORS middleware for development - completed
