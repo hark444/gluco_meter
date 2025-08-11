@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import sys
 
@@ -64,9 +64,9 @@ def test_login_token_expiration():
 
     token = response.json()["access_token"]
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    expires_at = datetime.fromtimestamp(payload["exp"])
+    expires_at = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
 
-    remaining = expires_at - datetime.utcnow()
+    remaining = expires_at - datetime.now(timezone.utc)
     expected = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     # Allow a small delta for processing time
