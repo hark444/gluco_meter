@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -24,7 +24,7 @@ def create_reading(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    created_at = reading_in.created_at or datetime.utcnow()
+    created_at = reading_in.created_at or datetime.now(timezone.utc)
     reading = Reading(
         user_id=current_user.id,
         value_ng_ml=reading_in.value_ng_ml,

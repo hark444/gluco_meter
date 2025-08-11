@@ -29,7 +29,7 @@ def upgrade() -> None:
         batch_op.add_column(sa.Column("value_ng_ml", sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column("reading_type", sa.String(), nullable=True))
         batch_op.add_column(sa.Column("notes", sa.String(), nullable=True))
-        batch_op.add_column(sa.Column("created_at", sa.DateTime(), nullable=True))
+        batch_op.add_column(sa.Column("created_at", sa.DateTime(timezone=True), nullable=True))
 
     # Backfill data from old columns if they exist
     op.execute(

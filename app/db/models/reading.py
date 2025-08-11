@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from app.db.base import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Reading(Base):
@@ -11,4 +11,4 @@ class Reading(Base):
     value_ng_ml = Column(Integer, nullable=False)
     reading_type = Column(String, nullable=False)
     notes = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
