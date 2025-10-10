@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { API_BASE_URL, TOKEN_STORAGE_KEY } from '../config/api'
 
 const AuthContext = createContext(null)
@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [authLoading, setAuthLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [token, setToken] = useState(null)
 
   const initials = useMemo(() => {
     if (!currentUser) return ''
@@ -28,11 +29,17 @@ export const AuthProvider = ({ children }) => {
     return currentUser.email.slice(0, 2).toUpperCase()
   }, [currentUser])
 
-  const fetchCurrentUser = async (token) => {
+  const fetchCurrentUser = useCallback(async (activeToken) => {
+    if (!activeToken) {
+      setCurrentUser(null)
+      setInitializing(false)
+      return
+    }
+
     try {
       const response = await fetch(`${API_BASE_URL}/me`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${activeToken}`
         }
       })
 
@@ -45,11 +52,31 @@ export const AuthProvider = ({ children }) => {
     } catch (fetchError) {
       console.error(fetchError)
       localStorage.removeItem(TOKEN_STORAGE_KEY)
+      setToken(null)
       setCurrentUser(null)
     } finally {
       setInitializing(false)
     }
-  }
+  }, [])
+
+  const authorizedFetch = useCallback(
+    (path, options = {}) => {
+      if (!token) {
+        return Promise.reject(new Error('Authentication required. Please login again.'))
+      }
+
+      const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+      }
+
+      return fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers
+      })
+    },
+    [token]
+  )
 
   const login = async ({ email, password }) => {
     setAuthLoading(true)
@@ -74,6 +101,7 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json()
       localStorage.setItem(TOKEN_STORAGE_KEY, data.access_token)
+      setToken(data.access_token)
       await fetchCurrentUser(data.access_token)
       setMessage('Welcome back! You are now signed in.')
       return true
@@ -127,6 +155,7 @@ export const AuthProvider = ({ children }) => {
 
       const loginData = await loginResponse.json()
       localStorage.setItem(TOKEN_STORAGE_KEY, loginData.access_token)
+      setToken(loginData.access_token)
       await fetchCurrentUser(loginData.access_token)
       return true
     } catch (requestError) {
@@ -139,6 +168,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem(TOKEN_STORAGE_KEY)
+    setToken(null)
     setCurrentUser(null)
     setMessage('You have been logged out successfully.')
   }
@@ -146,15 +176,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY)
     if (storedToken) {
+      setToken(storedToken)
       fetchCurrentUser(storedToken)
     } else {
       setInitializing(false)
     }
-  }, [])
+  }, [fetchCurrentUser])
 
   return (
     <AuthContext.Provider
       value={{
+        authorizedFetch,
         authLoading,
         currentUser,
         error,
@@ -165,7 +197,8 @@ export const AuthProvider = ({ children }) => {
         message,
         setMessage,
         setError,
-        signup
+        signup,
+        token
       }}
     >
       {children}
