@@ -1,8 +1,17 @@
 import { useAuth } from '../context/AuthContext'
 import AuthCard from './auth/AuthCard'
+import ReadingsDashboard from './readings/ReadingsDashboard'
 
 const HomePage = () => {
   const { currentUser } = useAuth()
+
+  if (currentUser) {
+    return (
+      <main>
+        <ReadingsDashboard />
+      </main>
+    )
+  }
 
   return (
     <main>
@@ -19,11 +28,9 @@ const HomePage = () => {
             <li>Share secure reports with your care team instantly</li>
             <li>Receive reminders tailored to your lifestyle</li>
           </ul>
-          {!currentUser && (
-            <a className="primary-cta" href="#get-started">
-              Join GlucoMeter today
-            </a>
-          )}
+          <a className="primary-cta" href="#get-started">
+            Join GlucoMeter today
+          </a>
         </div>
         <AuthCard />
       </section>
