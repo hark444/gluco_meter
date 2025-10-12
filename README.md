@@ -44,6 +44,9 @@ ready for integrating UI components that consume those APIs.
    npm run dev
    ```
    By default the app runs on http://localhost:5173/.
+   API requests to `/api` are proxied to http://localhost:8000; set the
+   `VITE_DEV_SERVER_PROXY_TARGET` environment variable before starting the
+   dev server to point at a different backend URL.
 
 ## Deployment with Docker
 
@@ -81,7 +84,7 @@ docker compose down
 ### Configuration
 
 - Override the published ports by setting `BACKEND_PORT` or `FRONTEND_PORT` environment variables before running `docker compose`.
-- During the frontend build the `VITE_API_BASE_URL` build argument defaults to `http://backend:8000/api`, which allows the static assets to reach the backend service through Docker's internal network. Set this argument to point at an external API when deploying the frontend image separately.
+- During the frontend build the `VITE_API_BASE_URL` build argument defaults to `/api`. The Nginx container proxies requests from `/api` to the backend service, so the browser only needs to reach the frontend's origin. Override this argument when deploying the frontend image separately.
 - The backend image includes the application code and runs `uvicorn app.main:app --host 0.0.0.0 --port 8000` by default. Swap in a different ASGI server or adjust worker counts by overriding the container command in your own Compose or orchestration definition.
 
 ## Next Steps
