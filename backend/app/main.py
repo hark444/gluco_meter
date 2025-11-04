@@ -12,7 +12,7 @@ app = FastAPI()
 
 def backup_job():
     bucket_name = settings.S3_BUCKET_NAME
-    db_file_path = settings.DATABASE_URL.split("///")[1]
+    db_file_path = settings.DATABASE_FILE_PATH
     object_name = db_file_path.split("/")[-1]
     if bucket_name:
         logging.info("Starting database backup to S3...")
