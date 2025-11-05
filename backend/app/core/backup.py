@@ -2,6 +2,7 @@ import logging
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
+
 def upload_to_s3(file_path, bucket_name, object_name):
     """
     Uploads a file to an S3 bucket.
