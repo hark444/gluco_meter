@@ -94,6 +94,8 @@ def update_reading(
         reading.value_ng_ml = reading_update.value_ng_ml
     if reading_update.reading_type is not None:
         reading.reading_type = reading_update.reading_type.value
+    if reading_update.created_at is not None:
+        reading.created_at = reading_update.created_at
     if reading_update.notes is not None:
         reading.notes = reading_update.notes
 
