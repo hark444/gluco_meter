@@ -61,7 +61,7 @@ def list_readings(
     total = query.count()
     query = query.order_by(Reading.created_at.desc()).offset((page - 1) * size).limit(size)
 
-    return PaginatedReadingOut(
+    return dict(
         total=total,
         page=page,
         size=size,
