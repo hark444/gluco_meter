@@ -35,3 +35,8 @@ class ReadingOut(BaseModel):
         orm_mode = True
 
 
+class PaginatedReadingOut(BaseModel):
+    total: int
+    page: int
+    size: int
+    readings: list[ReadingOut]
