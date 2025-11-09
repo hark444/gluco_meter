@@ -1,15 +1,17 @@
-import Header from '../Header'
-import HomePage from '../HomePage'
-import Footer from '../Footer'
+import { Outlet } from 'react-router-dom';
+import Header from '../Header';
+import Footer from '../Footer';
 
 const AppLayout = () => {
   return (
     <div className="app-shell">
       <Header />
-      <HomePage />
+      <main>
+        <Outlet />
+      </main>
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default AppLayout
+export default AppLayout;
