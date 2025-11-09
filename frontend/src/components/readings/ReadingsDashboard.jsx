@@ -54,6 +54,9 @@ const formatDateTime = (value) => {
 const ReadingsDashboard = () => {
   const { authorizedFetch, currentUser } = useAuth()
   const [readings, setReadings] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalReadings, setTotalReadings] = useState(0)
+  const pageSize = 10
   const [loading, setLoading] = useState(true)
   const [formState, setFormState] = useState(initialFormState)
   const [activeReadingId, setActiveReadingId] = useState(null)
@@ -74,33 +77,37 @@ const ReadingsDashboard = () => {
     setActiveReadingId(null)
   }
 
-  const loadReadings = useCallback(async () => {
-    console.log('loadReadings called')
-    console.log('currentUser', currentUser)
-    if (!currentUser) {
-      setReadings([])
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    setFeedback((previous) => ({ ...previous, error: '' }))
-
-    try {
-      const response = await authorizedFetch('/readings')
-      if (!response.ok) {
-        throw new Error(await parseErrorResponse(response, 'Unable to load readings.'))
+  const loadReadings = useCallback(
+    async (requestedPage = 1) => {
+      if (!currentUser) {
+        setReadings([])
+        setLoading(false)
+        return
       }
 
-      const data = await response.json()
-      setReadings(data)
-    } catch (requestError) {
-      setFeedback({ success: '', error: requestError.message })
-      setReadings([])
-    } finally {
-      setLoading(false)
-    }
-  }, [authorizedFetch, currentUser])
+      setLoading(true)
+      setFeedback((previous) => ({ ...previous, error: '' }))
+
+      try {
+        const response = await authorizedFetch(`/readings?page=${requestedPage}&size=${pageSize}`)
+        if (!response.ok) {
+          throw new Error(await parseErrorResponse(response, 'Unable to load readings.'))
+        }
+
+        const data = await response.json()
+        setReadings(data.readings)
+        setTotalReadings(data.total)
+        setPage(requestedPage)
+      } catch (requestError) {
+        setFeedback({ success: '', error: requestError.message })
+        setReadings([])
+        setTotalReadings(0)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [authorizedFetch, currentUser]
+  )
 
   useEffect(() => {
     loadReadings()
@@ -291,7 +298,7 @@ const ReadingsDashboard = () => {
         <div className="readings-panel">
           <div className="panel-header">
             <h2>Your recent readings</h2>
-            <span className="reading-count">{readings.length} total</span>
+            <span className="reading-count">{totalReadings} total</span>
           </div>
 
           {loading ? (
@@ -343,6 +350,27 @@ const ReadingsDashboard = () => {
                   ))}
                 </tbody>
               </table>
+              <div className="pagination-controls">
+                <button
+                  type="button"
+                  onClick={() => loadReadings(page - 1)}
+                  disabled={page === 1}
+                  className="pagination-button"
+                >
+                  Previous
+                </button>
+                <span className="page-indicator">
+                  Page {page} of {Math.ceil(totalReadings / pageSize)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => loadReadings(page + 1)}
+                  disabled={page * pageSize >= totalReadings}
+                  className="pagination-button"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </div>

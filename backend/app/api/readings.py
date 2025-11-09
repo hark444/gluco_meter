@@ -12,6 +12,7 @@ from app.schemas.reading import (
     ReadingOut,
     ReadingUpdate,
     ReadingType,
+    PaginatedReadingOut,
 )
 
 
@@ -38,11 +39,13 @@ def create_reading(
     return reading
 
 
-@router.get("/readings", response_model=List[ReadingOut])
+@router.get("/readings", response_model=PaginatedReadingOut)
 def list_readings(
     start: Optional[datetime] = Query(None, description="Start datetime inclusive"),
     end: Optional[datetime] = Query(None, description="End datetime inclusive"),
     reading_type: Optional[ReadingType] = Query(None),
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Page size"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -55,8 +58,15 @@ def list_readings(
     if reading_type is not None:
         query = query.filter(Reading.reading_type == reading_type.value)
 
-    query = query.order_by(Reading.created_at.desc())
-    return query.all()
+    total = query.count()
+    query = query.order_by(Reading.created_at.desc()).offset((page - 1) * size).limit(size)
+
+    return dict(
+        total=total,
+        page=page,
+        size=size,
+        readings=query.all(),
+    )
 
 
 @router.get("/readings/{reading_id}", response_model=ReadingOut)
