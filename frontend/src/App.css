@@ -806,3 +806,39 @@ main {
     width: auto;
   }
 }
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: white;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 15px rgba(37, 99, 235, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px rgba(37, 99, 235, 0.15);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.page-indicator {
+  font-weight: 600;
+  color: #475569;
+}
