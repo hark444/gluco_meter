@@ -11,9 +11,20 @@ const readingTypeLabels = readingTypeOptions.reduce((accumulator, option) => {
   return { ...accumulator, [option.value]: option.label }
 }, {})
 
+const getCurrentDateTimeLocal = () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const day = now.getDate().toString().padStart(2, '0')
+  const hours = now.getHours().toString().padStart(2, '0')
+  const minutes = now.getMinutes().toString().padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 const initialFormState = {
   value_ng_ml: '',
   reading_type: 'fasting',
+  created_at: getCurrentDateTimeLocal(),
   notes: ''
 }
 
@@ -115,6 +126,7 @@ const ReadingsDashboard = () => {
     const payload = {
       value_ng_ml: numericValue,
       reading_type: formState.reading_type,
+      created_at: formState.created_at,
       notes: formState.notes.trim() ? formState.notes.trim() : null
     }
 
@@ -160,6 +172,7 @@ const ReadingsDashboard = () => {
     setFormState({
       value_ng_ml: String(reading.value_ng_ml),
       reading_type: reading.reading_type,
+      created_at: reading.created_at,
       notes: reading.notes || ''
     })
   }
@@ -245,6 +258,17 @@ const ReadingsDashboard = () => {
                   </option>
                 ))}
               </select>
+            </label>
+            <label>
+              Date
+              <input
+                type="datetime-local"
+                value={formState.created_at}
+                onChange={(event) =>
+                  setFormState((previous) => ({ ...previous, created_at: event.target.value }))
+                }
+                required
+              />
             </label>
           </div>
           <label className="notes-field">

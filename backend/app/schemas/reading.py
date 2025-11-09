@@ -21,6 +21,7 @@ class ReadingCreate(BaseModel):
 class ReadingUpdate(BaseModel):
     value_ng_ml: Optional[int] = Field(None, ge=0)
     reading_type: Optional[ReadingType] = None
+    created_at: Optional[datetime] = None
     notes: Optional[str] = None
 
 
