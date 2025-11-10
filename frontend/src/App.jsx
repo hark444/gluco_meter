@@ -1,10 +1,14 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 import AppLayout from './components/layout/AppLayout'
+import AuthLayout from './components/layout/AuthLayout'
+import LoginPage from './components/auth/LoginPage'
+import SignUpPage from './components/auth/SignUpPage'
 import ReadingsDashboard from './components/readings/ReadingsDashboard'
 import AddReadingPage from './components/readings/AddReadingPage'
 import ViewReadingsPage from './components/readings/ViewReadingsPage'
 import { AuthProvider } from './context/AuthContext'
+import HomePage from './components/HomePage'
 
 const router = createBrowserRouter([
   {
@@ -13,7 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/readings" replace />
+        element: <HomePage />
       },
       {
         path: 'readings',
@@ -31,6 +35,20 @@ const router = createBrowserRouter([
       }
     ]
   },
+  {
+    path: '/auth',
+    element: <AuthLayout />,
+    children: [
+      {
+        path: 'login',
+        element: <LoginPage />
+      },
+      {
+        path: 'signup',
+        element: <SignUpPage />
+      }
+    ]
+  }
 ])
 
 function App() {
