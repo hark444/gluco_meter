@@ -1,21 +1,21 @@
-import { useAuth } from '../context/AuthContext'
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Header = () => {
-  const { currentUser, initials, logout } = useAuth()
+  const { currentUser, initials, logout } = useAuth();
 
   return (
     <header className="app-header">
-      <div className="brand">
+      <NavLink to="/" className="brand">
         <div className="brand-icon">GM</div>
         <div className="brand-text">
           <span className="brand-name">GlucoMeter</span>
           <span className="brand-tagline">Smarter glucose insights</span>
         </div>
-      </div>
+      </NavLink>
       <nav className="nav-links">
-        <a href="#features">Features</a>
-        <a href="#insights">Insights</a>
-        <a href="#security">Security</a>
+        <NavLink to="/readings">View Readings</NavLink>
+        <NavLink to="/readings/add">Add Reading</NavLink>
       </nav>
       <div className="header-actions">
         {currentUser ? (
@@ -30,13 +30,13 @@ const Header = () => {
             </button>
           </div>
         ) : (
-          <a className="cta-button" href="#get-started">
+          <NavLink className="cta-button" to="/auth/login">
             Get Started
-          </a>
+          </NavLink>
         )}
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
