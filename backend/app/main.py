@@ -15,8 +15,12 @@ def backup_job():
     db_file_path = settings.DATABASE_FILE_PATH
     object_name = db_file_path.split("/")[-1]
     if bucket_name:
-        logging.info(f"Starting database backup to S3 bucket: {bucket_name}...")
-        upload_to_s3(db_file_path, bucket_name, object_name)
+        try:
+            logging.info(f"Starting database backup to S3 bucket: {bucket_name}...")
+            upload_to_s3(db_file_path, bucket_name, object_name)
+            logging.info("Database backup to S3 completed successfully.")
+        except Exception as e:
+            logging.error(f"Error during database backup to S3: {e}")
     else:
         logging.error("S3_BUCKET_NAME environment variable not set. Backup skipped.")
 
