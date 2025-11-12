@@ -25,7 +25,14 @@ const initialFormState = {
   value_ng_ml: '',
   reading_type: 'fasting',
   created_at: getCurrentDateTimeLocal(),
-  notes: ''
+  notes: '',
+  // Health metrics (optional)
+  step_count: '',
+  sleep_hours: '',
+  calorie_count: '',
+  protein_intake_g: '',
+  carb_intake_g: '',
+  exercise_minutes: ''
 }
 
 const parseErrorResponse = async (response, fallbackMessage) => {
@@ -49,6 +56,15 @@ const formatDateTime = (value) => {
   } catch (error) {
     return value
   }
+}
+
+const formatNumber = (value) => {
+  if (value == null) return '—'
+  if (typeof value === 'number') {
+    // Format integers without decimals, floats with 1 decimal place
+    return Number.isInteger(value) ? value.toLocaleString() : value.toFixed(1)
+  }
+  return value
 }
 
 const ReadingsDashboard = () => {
@@ -123,11 +139,37 @@ const ReadingsDashboard = () => {
       return
     }
 
+    // Validate health metrics if provided
+    if (formState.sleep_hours !== '') {
+      const sleepHours = Number.parseFloat(formState.sleep_hours)
+      if (Number.isNaN(sleepHours) || sleepHours < 0 || sleepHours > 24) {
+        setFeedback({ success: '', error: 'Sleep hours must be between 0 and 24.' })
+        return
+      }
+    }
+
+    // Helper function to parse optional numeric values
+    const parseOptionalNumber = (value) => {
+      if (value === '' || value === null || value === undefined) return null
+      const parsed = value.includes('.') ? Number.parseFloat(value) : Number.parseInt(value, 10)
+      if (Number.isNaN(parsed) || parsed < 0) {
+        return null
+      }
+      return parsed
+    }
+
     const payload = {
       value_ng_ml: numericValue,
       reading_type: formState.reading_type,
       created_at: formState.created_at,
-      notes: formState.notes.trim() ? formState.notes.trim() : null
+      notes: formState.notes.trim() ? formState.notes.trim() : null,
+      // Health metrics - convert empty strings to null
+      step_count: parseOptionalNumber(formState.step_count),
+      sleep_hours: parseOptionalNumber(formState.sleep_hours),
+      calorie_count: parseOptionalNumber(formState.calorie_count),
+      protein_intake_g: parseOptionalNumber(formState.protein_intake_g),
+      carb_intake_g: parseOptionalNumber(formState.carb_intake_g),
+      exercise_minutes: parseOptionalNumber(formState.exercise_minutes)
     }
 
     const isEditing = Boolean(activeReadingId)
@@ -173,7 +215,14 @@ const ReadingsDashboard = () => {
       value_ng_ml: String(reading.value_ng_ml),
       reading_type: reading.reading_type,
       created_at: reading.created_at,
-      notes: reading.notes || ''
+      notes: reading.notes || '',
+      // Health metrics - convert null/undefined to empty string for form
+      step_count: reading.step_count != null ? String(reading.step_count) : '',
+      sleep_hours: reading.sleep_hours != null ? String(reading.sleep_hours) : '',
+      calorie_count: reading.calorie_count != null ? String(reading.calorie_count) : '',
+      protein_intake_g: reading.protein_intake_g != null ? String(reading.protein_intake_g) : '',
+      carb_intake_g: reading.carb_intake_g != null ? String(reading.carb_intake_g) : '',
+      exercise_minutes: reading.exercise_minutes != null ? String(reading.exercise_minutes) : ''
     })
   }
 
@@ -271,6 +320,101 @@ const ReadingsDashboard = () => {
               />
             </label>
           </div>
+
+          <div className="form-section">
+            <h3 className="form-section-title">Activity & Lifestyle (Optional)</h3>
+            <div className="form-grid">
+              <label>
+                Step Count
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={formState.step_count}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, step_count: event.target.value }))
+                  }
+                  placeholder="e.g., 10000"
+                />
+              </label>
+              <label>
+                Sleep Hours
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  step="0.1"
+                  inputMode="decimal"
+                  value={formState.sleep_hours}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, sleep_hours: event.target.value }))
+                  }
+                  placeholder="e.g., 7.5"
+                />
+              </label>
+              <label>
+                Exercise Minutes
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={formState.exercise_minutes}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, exercise_minutes: event.target.value }))
+                  }
+                  placeholder="e.g., 30"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <h3 className="form-section-title">Nutrition (Optional)</h3>
+            <div className="form-grid">
+              <label>
+                Total Calories
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={formState.calorie_count}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, calorie_count: event.target.value }))
+                  }
+                  placeholder="e.g., 2000"
+                />
+              </label>
+              <label>
+                Protein (grams)
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  inputMode="decimal"
+                  value={formState.protein_intake_g}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, protein_intake_g: event.target.value }))
+                  }
+                  placeholder="e.g., 150"
+                />
+              </label>
+              <label>
+                Carbs (grams)
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  inputMode="decimal"
+                  value={formState.carb_intake_g}
+                  onChange={(event) =>
+                    setFormState((previous) => ({ ...previous, carb_intake_g: event.target.value }))
+                  }
+                  placeholder="e.g., 200"
+                />
+              </label>
+            </div>
+          </div>
+
           <label className="notes-field">
             Notes (optional)
             <textarea
@@ -318,6 +462,12 @@ const ReadingsDashboard = () => {
                     <th scope="col">Recorded</th>
                     <th scope="col">Value (mg/dL)</th>
                     <th scope="col">Type</th>
+                    <th scope="col" className="metric-header">Steps</th>
+                    <th scope="col" className="metric-header">Sleep (hrs)</th>
+                    <th scope="col" className="metric-header">Exercise (min)</th>
+                    <th scope="col" className="metric-header">Calories</th>
+                    <th scope="col" className="metric-header">Protein (g)</th>
+                    <th scope="col" className="metric-header">Carbs (g)</th>
                     <th scope="col">Notes</th>
                     <th scope="col" className="actions-column">
                       Actions
@@ -332,6 +482,12 @@ const ReadingsDashboard = () => {
                       <td>
                         <span className="reading-badge">{readingTypeLabels[reading.reading_type] || reading.reading_type}</span>
                       </td>
+                      <td className="metric-cell">{formatNumber(reading.step_count)}</td>
+                      <td className="metric-cell">{formatNumber(reading.sleep_hours)}</td>
+                      <td className="metric-cell">{formatNumber(reading.exercise_minutes)}</td>
+                      <td className="metric-cell">{formatNumber(reading.calorie_count)}</td>
+                      <td className="metric-cell">{formatNumber(reading.protein_intake_g)}</td>
+                      <td className="metric-cell">{formatNumber(reading.carb_intake_g)}</td>
                       <td className="notes-cell">{reading.notes || '—'}</td>
                       <td className="row-actions">
                         <button type="button" onClick={() => handleEdit(reading)} className="link-button">
